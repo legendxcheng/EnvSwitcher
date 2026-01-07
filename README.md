@@ -1,73 +1,85 @@
 # EnvVarSwitcher (evs)
 
-A PowerShell tool to quickly switch between different environment variable configurations.
+A tool to quickly switch between different environment variable configurations.
 
-## Installation
+Supports both **Windows PowerShell** and **WSL/Linux Bash**.
+
+---
+
+## Windows Installation (PowerShell)
 
 ```powershell
-# Navigate to the tool directory
 cd E:\EnvVarSwitcher
-
-# Run the installer
 .\Install.ps1
-
-# Reload your profile (or restart PowerShell)
 . $PROFILE
 ```
 
+## WSL/Linux Installation (Bash)
+
+```bash
+cd /mnt/e/EnvVarSwitcher
+bash install-wsl.sh
+source ~/.bashrc
+```
+
+**Prerequisite**: Install `jq` for JSON parsing:
+```bash
+sudo apt install jq    # Ubuntu/Debian
+```
+
+---
+
 ## Usage
+
+Commands are identical on both Windows and WSL:
 
 ### List available profiles
 
-```powershell
+```bash
 evs list
-# or
 evs ls
 ```
 
 ### Switch to a profile
 
-```powershell
+```bash
 evs use dev
-# or
 evs switch prod
 ```
 
 ### Show current state
 
-```powershell
-# Show active profile and variables
-evs show
-
-# Preview a specific profile
-evs show prod
+```bash
+evs show           # Show active profile and variables
+evs show prod      # Preview a specific profile
 ```
 
 ### Clear current session
 
-```powershell
+```bash
 evs clear
 ```
 
 ### Create a new profile
 
-```powershell
+```bash
 evs add staging
 ```
 
 ### Edit a profile
 
-```powershell
+```bash
 evs edit dev
 ```
 
 ### Remove a profile
 
-```powershell
+```bash
 evs remove old-profile
-# or
 evs rm old-profile
 ```
+
+---
 
 ## Profile Format
 
@@ -85,17 +97,23 @@ Profiles are stored as JSON files in the `profiles/` directory:
 }
 ```
 
+---
+
 ## Directory Structure
 
 ```
 E:\EnvVarSwitcher\
-├── evs.ps1              # Main script
-├── Install.ps1          # Installation script
-├── profiles/            # Profile configurations
+├── evs.ps1              # Windows PowerShell script
+├── evs.sh               # WSL/Linux Bash script
+├── Install.ps1          # Windows installer
+├── install-wsl.sh       # WSL/Linux installer
+├── profiles/            # Shared profile configurations
 │   ├── dev.json
 │   └── prod.json
 └── README.md
 ```
+
+---
 
 ## How It Works
 
@@ -103,27 +121,58 @@ E:\EnvVarSwitcher\
 - Switching profiles clears previously set variables first
 - Variables are tracked so `evs clear` knows what to remove
 - No system-wide changes are made
+- **Windows and WSL share the same `profiles/` directory**
+
+---
+
+## WSL-Specific Notes
+
+### Profile Locations
+
+WSL checks for profiles in this order:
+1. `~/.config/evs/profiles/` (local, takes priority)
+2. `/mnt/e/EnvVarSwitcher/profiles/` (shared with Windows)
+
+### Create Local Profiles
+
+```bash
+mkdir -p ~/.config/evs/profiles
+```
+
+Local profiles override shared ones with the same name.
+
+---
 
 ## Tips
 
 1. **Quick switching**: Use `evs use <profile>` to instantly switch environments
 2. **Preview before switch**: Use `evs show <profile>` to see what variables will be set
-3. **Clean state**: Use `evs clear` to return to a clean state without any evs-managed variables
+3. **Clean state**: Use `evs clear` to return to a clean state
+4. **Cross-platform**: Edit profiles on Windows, use them in WSL (and vice versa)
+
+---
 
 ## Troubleshooting
 
 ### "evs: command not found"
 
-Run the installer again:
+**Windows:**
 ```powershell
 cd E:\EnvVarSwitcher
 .\Install.ps1
 . $PROFILE
 ```
 
+**WSL:**
+```bash
+cd /mnt/e/EnvVarSwitcher
+bash install-wsl.sh
+source ~/.bashrc
+```
+
 ### Variables not showing after switch
 
-Make sure you're checking in the same PowerShell session where you ran `evs use`.
+Make sure you're checking in the same terminal session where you ran `evs use`.
 
 ### Profile not found
 
@@ -131,6 +180,15 @@ Check that your profile file:
 1. Is in the `profiles/` directory
 2. Has a `.json` extension
 3. Is valid JSON format
+
+### WSL: "jq: command not found"
+
+Install jq:
+```bash
+sudo apt install jq
+```
+
+---
 
 ## License
 

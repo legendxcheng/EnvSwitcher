@@ -93,6 +93,31 @@ function Read-ProfileConfig {
     }
 }
 
+function Get-MaskedValue {
+    param([string]$Value)
+
+    if ([string]::IsNullOrEmpty($Value)) {
+        return $Value
+    }
+
+    $len = $Value.Length
+    if ($len -le 4) {
+        # Too short, mask entirely
+        return "*" * $len
+    }
+    elseif ($len -le 8) {
+        # Short value: show first 1 and last 1
+        return $Value[0] + ("*" * ($len - 2)) + $Value[-1]
+    }
+    else {
+        # Normal value: show first 2 and last 3
+        $first = $Value.Substring(0, 2)
+        $last = $Value.Substring($len - 3)
+        $masked = "*" * ($len - 5)
+        return "$first$masked$last"
+    }
+}
+
 function Get-TrackedVars {
     $tracked = [Environment]::GetEnvironmentVariable($script:TrackedVarsKey)
     if ([string]::IsNullOrEmpty($tracked)) {
@@ -242,10 +267,11 @@ function Invoke-Use {
         Write-Host "  Set $varCount variable(s):"
         foreach ($varName in $varNames) {
             $value = [Environment]::GetEnvironmentVariable($varName)
+            $maskedValue = Get-MaskedValue $value
             Write-Host "    " -NoNewline
             Write-Host $varName -NoNewline -ForegroundColor Cyan
             Write-Host " = " -NoNewline
-            Write-Host $value -ForegroundColor White
+            Write-Host $maskedValue -ForegroundColor White
         }
     }
 
@@ -281,10 +307,11 @@ function Invoke-Show {
 
         if ($config.variables) {
             $config.variables.PSObject.Properties | ForEach-Object {
+                $maskedValue = Get-MaskedValue $_.Value
                 Write-Host "    " -NoNewline
                 Write-Host $_.Name -NoNewline -ForegroundColor Cyan
                 Write-Host " = " -NoNewline
-                Write-Host $_.Value -ForegroundColor White
+                Write-Host $maskedValue -ForegroundColor White
             }
         }
         else {
@@ -314,10 +341,11 @@ function Invoke-Show {
         Write-Host "Variables:"
         foreach ($varName in $trackedVars) {
             $value = [Environment]::GetEnvironmentVariable($varName)
+            $maskedValue = Get-MaskedValue $value
             Write-Host "    " -NoNewline
             Write-Host $varName -NoNewline -ForegroundColor Cyan
             Write-Host " = " -NoNewline
-            Write-Host $value -ForegroundColor White
+            Write-Host $maskedValue -ForegroundColor White
         }
     }
     else {

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "WebSearch",
+      "Bash(powershell:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: EnvVarSwitcher \\(evs\\) tool\n\nA PowerShell tool to quickly switch between different environment variable configurations.\n\nFeatures:\n- evs list: List all available profiles\n- evs use <name>: Switch to specified profile\n- evs show: Show current state or preview a profile\n- evs clear: Clear all variables set by current profile\n- evs add/edit/remove: Manage profiles\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(wsl -e ls:*)"
+    ]
+  }
+}
