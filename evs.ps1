@@ -313,6 +313,32 @@ function Invoke-Use {
         return
     }
 
+    # Check if it's a codex profile (directory)
+    if (Test-CodexProfile $ProfileName) {
+        # Handle codex configuration
+        $success = Apply-CodexConfig $ProfileName
+        if (-not $success) {
+            return
+        }
+
+        # Clear previous environment variables
+        Invoke-Clear -Silent
+
+        # Set active profile
+        [Environment]::SetEnvironmentVariable($script:ActiveProfileKey, $ProfileName)
+
+        # Output
+        Write-Host ""
+        Write-ColorOutput "Switched to '$ProfileName' (codex)" "Success"
+        Write-Host ""
+        Write-Host "  Codex configuration files updated:"
+        Write-Host "    config.toml"
+        Write-Host "    auth.json"
+        Write-Host ""
+        return
+    }
+
+    # Handle environment variable profile (JSON file)
     $config = Read-ProfileConfig $ProfileName
     if ($null -eq $config) {
         Write-ColorOutput "Profile '$ProfileName' not found." "Error"
