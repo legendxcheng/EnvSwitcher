@@ -68,6 +68,47 @@ function Get-CodexProfilePath {
     return Join-Path $script:ProfilesDir $ProfileName
 }
 
+function Apply-CodexConfig {
+    param([string]$ProfileName)
+
+    $profilePath = Get-CodexProfilePath $ProfileName
+    $configPath = Join-Path $profilePath "config.toml"
+    $authPath = Join-Path $profilePath "auth.json"
+
+    # Validate files exist
+    if (-not (Test-Path $configPath)) {
+        Write-ColorOutput "Missing config.toml in profile '$ProfileName'" "Error"
+        return $false
+    }
+
+    if (-not (Test-Path $authPath)) {
+        Write-ColorOutput "Missing auth.json in profile '$ProfileName'" "Error"
+        return $false
+    }
+
+    # Ensure ~/.codex directory exists
+    $codexDir = Join-Path $env:USERPROFILE ".codex"
+    if (-not (Test-Path $codexDir)) {
+        New-Item -ItemType Directory -Path $codexDir -Force | Out-Null
+    }
+
+    # Copy files
+    try {
+        $targetConfig = Join-Path $codexDir "config.toml"
+        $targetAuth = Join-Path $codexDir "auth.json"
+
+        Copy-Item $configPath $targetConfig -Force
+        Copy-Item $authPath $targetAuth -Force
+
+        return $true
+    }
+    catch {
+        Write-ColorOutput "Failed to copy config files: $_" "Error"
+        Write-ColorOutput "Check permissions for $codexDir directory" "Warning"
+        return $false
+    }
+}
+
 function Get-AllProfiles {
     if (-not (Test-Path $script:ProfilesDir)) {
         return @()
