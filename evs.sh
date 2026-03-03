@@ -237,42 +237,67 @@ _evs_list() {
         return 1
     fi
 
-    # Use ls instead of find for better WSL compatibility
-    local profiles=()
-    for f in "$EVS_PROFILES_DIR"/*.json; do
-        [[ -f "$f" ]] && profiles+=("$f")
-    done
-
-    if [[ ${#profiles[@]} -eq 0 ]]; then
-        echo -e "${YELLOW}No profiles found.${NC}"
-        echo "Create one with: evs add <name>"
-        return 0
-    fi
-
     local active="${!EVS_ACTIVE_PROFILE_KEY}"
 
     echo ""
     echo "Available profiles:"
     echo ""
 
-    for profile_path in "${profiles[@]}"; do
-        local filename=$(basename "$profile_path" .json)
-        local description=$(jq -r '.description // empty' "$profile_path" 2>/dev/null)
+    local has_profiles=false
 
-        local marker=" "
-        local color=""
-        if [[ "$filename" == "$active" ]]; then
-            marker="*"
-            color="$GREEN"
-        fi
+    # List JSON profiles (environment variables)
+    for f in "$EVS_PROFILES_DIR"/*.json; do
+        if [[ -f "$f" ]]; then
+            has_profiles=true
+            local filename=$(basename "$f" .json)
+            local description=$(jq -r '.description // empty' "$f" 2>/dev/null)
 
-        printf "  %s ${color}%-15s${NC}" "$marker" "$filename"
-        if [[ -n "$description" ]]; then
-            echo -e " ${GRAY}- $description${NC}"
-        else
-            echo ""
+            local marker=" "
+            local color=""
+            if [[ "$filename" == "$active" ]]; then
+                marker="*"
+                color="$GREEN"
+            fi
+
+            printf "  %s ${color}%-15s${NC} [env]  " "$marker" "$filename"
+            if [[ -n "$description" ]]; then
+                echo -e " ${GRAY}- $description${NC}"
+            else
+                echo ""
+            fi
         fi
     done
+
+    # List directory profiles (codex configurations)
+    for d in "$EVS_PROFILES_DIR"/*; do
+        if [[ -d "$d" ]]; then
+            local dirname=$(basename "$d")
+            local config_file="$d/config.toml"
+            local auth_file="$d/auth.json"
+
+            # Only list if both required files exist
+            if [[ -f "$config_file" ]] && [[ -f "$auth_file" ]]; then
+                has_profiles=true
+
+                local marker=" "
+                local color=""
+                if [[ "$dirname" == "$active" ]]; then
+                    marker="*"
+                    color="$GREEN"
+                fi
+
+                printf "  %s ${color}%-15s${NC} [codex]" "$marker" "$dirname"
+                echo -e " ${GRAY}- Codex configuration${NC}"
+            fi
+        fi
+    done
+
+    if [[ "$has_profiles" == "false" ]]; then
+        echo -e "${YELLOW}No profiles found.${NC}"
+        echo "Create one with: evs add <name>"
+        echo ""
+        return 0
+    fi
 
     echo ""
     echo -e "  ${GRAY}* = active profile${NC}"
