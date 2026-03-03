@@ -282,7 +282,10 @@ function Invoke-List {
         $marker = if ($p.FileName -eq $activeProfile) { "*" } else { " " }
         $color = if ($p.FileName -eq $activeProfile) { "Green" } else { "White" }
 
-        $line = "  $marker $($p.FileName.PadRight(15))"
+        # Add type indicator
+        $typeIndicator = if ($p.Type -eq "codex") { "[codex]" } else { "[env]  " }
+
+        $line = "  $marker $($p.FileName.PadRight(15)) $typeIndicator"
         Write-Host $line -NoNewline -ForegroundColor $color
 
         if ($p.Description) {
