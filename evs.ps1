@@ -399,6 +399,35 @@ function Invoke-Show {
 
     # If profile name given, preview that profile
     if (-not [string]::IsNullOrEmpty($ProfileName)) {
+        # Check if it's a codex profile
+        if (Test-CodexProfile $ProfileName) {
+            Write-Host "Profile: " -NoNewline
+            Write-Host $ProfileName -ForegroundColor Cyan
+            Write-Host "  Type: " -NoNewline
+            Write-Host "codex" -ForegroundColor Yellow
+            Write-Host ""
+
+            $profilePath = Get-CodexProfilePath $ProfileName
+            $configPath = Join-Path $profilePath "config.toml"
+            $authPath = Join-Path $profilePath "auth.json"
+
+            Write-Host "Files:"
+            if (Test-Path $configPath) {
+                Write-Host "  ✓ config.toml" -ForegroundColor Green
+            } else {
+                Write-Host "  ✗ config.toml (missing)" -ForegroundColor Red
+            }
+
+            if (Test-Path $authPath) {
+                Write-Host "  ✓ auth.json" -ForegroundColor Green
+            } else {
+                Write-Host "  ✗ auth.json (missing)" -ForegroundColor Red
+            }
+
+            Write-Host ""
+            return
+        }
+
         $config = Read-ProfileConfig $ProfileName
         if ($null -eq $config) {
             Write-ColorOutput "Profile '$ProfileName' not found." "Error"
@@ -445,6 +474,17 @@ function Invoke-Show {
 
     Write-Host "Active profile: " -NoNewline
     Write-Host $activeProfile -ForegroundColor Green
+
+    # Check if active profile is codex type
+    if (Test-CodexProfile $activeProfile) {
+        Write-Host "  Type: " -NoNewline
+        Write-Host "codex" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Codex configuration active"
+        Write-Host ""
+        return
+    }
+
     Write-Host ""
 
     if ($trackedVars.Count -gt 0) {
