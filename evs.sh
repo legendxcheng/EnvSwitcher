@@ -30,26 +30,31 @@ _evs_get_script_dir() {
     cd -P "$(dirname "$source")" && pwd
 }
 
-# Try to detect script directory, fallback to hardcoded path
-if [[ -n "${BASH_SOURCE[0]}" && "${BASH_SOURCE[0]}" != "main" ]]; then
-    EVS_SCRIPT_DIR="$(_evs_get_script_dir 2>/dev/null)" || EVS_SCRIPT_DIR="/mnt/e/EnvVarSwitcher"
-else
-    EVS_SCRIPT_DIR="/mnt/e/EnvVarSwitcher"
+_evs_is_wsl() {
+    grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease 2>/dev/null
+}
+
+# Try to detect script directory; if unavailable, fall back to local config.
+if [[ -n "${BASH_SOURCE[0]:-}" ]] && [[ "${BASH_SOURCE[0]}" != "main" ]]; then
+    EVS_SCRIPT_DIR="$(_evs_get_script_dir 2>/dev/null)"
+fi
+if [[ -z "$EVS_SCRIPT_DIR" ]] || [[ ! -d "$EVS_SCRIPT_DIR" ]]; then
+    EVS_SCRIPT_DIR="$HOME/.config/evs"
 fi
 
-# Profiles directory (prefer local, fallback to Windows share)
+# Profiles directory (prefer local, then script path, then WSL shared mount).
 EVS_LOCAL_PROFILES="$HOME/.config/evs/profiles"
-EVS_WINDOWS_PROFILES="$EVS_SCRIPT_DIR/profiles"
-EVS_FALLBACK_PROFILES="/mnt/e/EnvVarSwitcher/profiles"
+EVS_SCRIPT_PROFILES="$EVS_SCRIPT_DIR/profiles"
+EVS_WSL_SHARED_PROFILES="${EVS_WSL_SHARED_PROFILES:-/mnt/e/EnvVarSwitcher/profiles}"
 
 if [[ -d "$EVS_LOCAL_PROFILES" ]] && [[ -n "$(ls -A "$EVS_LOCAL_PROFILES" 2>/dev/null)" ]]; then
     EVS_PROFILES_DIR="$EVS_LOCAL_PROFILES"
-elif [[ -d "$EVS_WINDOWS_PROFILES" ]]; then
-    EVS_PROFILES_DIR="$EVS_WINDOWS_PROFILES"
-elif [[ -d "$EVS_FALLBACK_PROFILES" ]]; then
-    EVS_PROFILES_DIR="$EVS_FALLBACK_PROFILES"
+elif [[ -d "$EVS_SCRIPT_PROFILES" ]]; then
+    EVS_PROFILES_DIR="$EVS_SCRIPT_PROFILES"
+elif _evs_is_wsl && [[ -d "$EVS_WSL_SHARED_PROFILES" ]]; then
+    EVS_PROFILES_DIR="$EVS_WSL_SHARED_PROFILES"
 else
-    EVS_PROFILES_DIR="$EVS_FALLBACK_PROFILES"
+    EVS_PROFILES_DIR="$EVS_LOCAL_PROFILES"
 fi
 
 # Tracking variables
@@ -104,6 +109,17 @@ _evs_add_tracked_var() {
     elif [[ ! ",$current," == *",$var,"* ]]; then
         export "$EVS_TRACKED_VARS_KEY=$current,$var"
     fi
+}
+
+_evs_is_codex_profile() {
+    local name="$1"
+    local dir_path="$EVS_PROFILES_DIR/$name"
+    [[ -d "$dir_path" ]]
+}
+
+_evs_get_codex_profile_path() {
+    local name="$1"
+    echo "$EVS_PROFILES_DIR/$name"
 }
 
 _evs_mask_value() {
