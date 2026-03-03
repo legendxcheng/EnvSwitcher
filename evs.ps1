@@ -114,17 +114,46 @@ function Get-AllProfiles {
         return @()
     }
 
-    $profiles = Get-ChildItem -Path $script:ProfilesDir -Filter "*.json" -ErrorAction SilentlyContinue
-    return $profiles | ForEach-Object {
-        $content = Get-Content $_.FullName -Raw | ConvertFrom-Json
-        [PSCustomObject]@{
-            FileName    = $_.BaseName
-            Name        = if ($content.name) { $content.name } else { $_.BaseName }
-            Description = if ($content.description) { $content.description } else { "" }
-            Variables   = $content.variables
-            Path        = $_.FullName
+    $allProfiles = @()
+
+    # Get JSON profiles (environment variables)
+    $jsonProfiles = Get-ChildItem -Path $script:ProfilesDir -Filter "*.json" -ErrorAction SilentlyContinue
+    foreach ($file in $jsonProfiles) {
+        try {
+            $content = Get-Content $file.FullName -Raw | ConvertFrom-Json
+            $allProfiles += [PSCustomObject]@{
+                FileName    = $file.BaseName
+                Name        = if ($content.name) { $content.name } else { $file.BaseName }
+                Description = if ($content.description) { $content.description } else { "" }
+                Type        = "env"
+                Variables   = $content.variables
+                Path        = $file.FullName
+            }
+        }
+        catch {
+            Write-ColorOutput "Failed to parse profile '$($file.BaseName)': $_" "Warning"
         }
     }
+
+    # Get directory profiles (codex configurations)
+    $dirProfiles = Get-ChildItem -Path $script:ProfilesDir -Directory -ErrorAction SilentlyContinue
+    foreach ($dir in $dirProfiles) {
+        $configPath = Join-Path $dir.FullName "config.toml"
+        $authPath = Join-Path $dir.FullName "auth.json"
+
+        if ((Test-Path $configPath) -and (Test-Path $authPath)) {
+            $allProfiles += [PSCustomObject]@{
+                FileName    = $dir.Name
+                Name        = $dir.Name
+                Description = "Codex configuration"
+                Type        = "codex"
+                Variables   = $null
+                Path        = $dir.FullName
+            }
+        }
+    }
+
+    return $allProfiles
 }
 
 function Read-ProfileConfig {
