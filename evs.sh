@@ -405,6 +405,35 @@ _evs_show() {
 
     # If profile name given, preview that profile
     if [[ -n "$profile_name" ]]; then
+        # Check if it's a codex profile
+        if _evs_is_codex_profile "$profile_name"; then
+            echo -n "Profile: "
+            echo -e "${CYAN}$profile_name${NC}"
+            echo -n "  Type: "
+            echo -e "${YELLOW}codex${NC}"
+            echo ""
+
+            local profile_path="$(_evs_get_codex_profile_path "$profile_name")"
+            local config_file="$profile_path/config.toml"
+            local auth_file="$profile_path/auth.json"
+
+            echo "Files:"
+            if [[ -f "$config_file" ]]; then
+                echo -e "  ${GREEN}✓ config.toml${NC}"
+            else
+                echo -e "  ${RED}✗ config.toml (missing)${NC}"
+            fi
+
+            if [[ -f "$auth_file" ]]; then
+                echo -e "  ${GREEN}✓ auth.json${NC}"
+            else
+                echo -e "  ${RED}✗ auth.json (missing)${NC}"
+            fi
+
+            echo ""
+            return 0
+        fi
+
         local profile_path="$(_evs_get_profile_path "$profile_name")"
 
         if [[ ! -f "$profile_path" ]]; then
@@ -452,6 +481,17 @@ _evs_show() {
 
     echo -n "Active profile: "
     echo -e "${GREEN}$active${NC}"
+
+    # Check if active profile is codex type
+    if _evs_is_codex_profile "$active"; then
+        echo -n "  Type: "
+        echo -e "${YELLOW}codex${NC}"
+        echo ""
+        echo "Codex configuration active"
+        echo ""
+        return 0
+    fi
+
     echo ""
 
     local tracked_vars=$(_evs_get_tracked_vars)
