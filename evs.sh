@@ -316,6 +316,31 @@ _evs_use() {
         return 1
     fi
 
+    # Check if it's a codex profile (directory)
+    if _evs_is_codex_profile "$profile_name"; then
+        # Handle codex configuration
+        if ! _evs_apply_codex_config "$profile_name"; then
+            return 1
+        fi
+
+        # Clear previous environment variables
+        _evs_clear --silent
+
+        # Set active profile
+        export "$EVS_ACTIVE_PROFILE_KEY=$profile_name"
+
+        # Output
+        echo ""
+        echo -e "${GREEN}✓ Switched to '$profile_name' (codex)${NC}"
+        echo ""
+        echo "  Codex configuration files updated:"
+        echo "    config.toml"
+        echo "    auth.json"
+        echo ""
+        return 0
+    fi
+
+    # Handle environment variable profile (JSON file)
     _evs_check_jq || return 1
 
     local profile_path="$(_evs_get_profile_path "$profile_name")"
