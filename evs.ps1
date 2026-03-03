@@ -44,17 +44,28 @@ function Write-ColorOutput {
 
     switch ($Type) {
         "Success" { Write-Host $Message -ForegroundColor Green }
-        "Error"   { Write-Host $Message -ForegroundColor Red }
+        "Error" { Write-Host $Message -ForegroundColor Red }
         "Warning" { Write-Host $Message -ForegroundColor Yellow }
-        "Info"    { Write-Host $Message -ForegroundColor Cyan }
-        "Muted"   { Write-Host $Message -ForegroundColor DarkGray }
-        default   { Write-Host $Message }
+        "Info" { Write-Host $Message -ForegroundColor Cyan }
+        "Muted" { Write-Host $Message -ForegroundColor DarkGray }
+        default { Write-Host $Message }
     }
 }
 
 function Get-ProfilePath {
     param([string]$ProfileName)
     return Join-Path $script:ProfilesDir "$ProfileName.json"
+}
+
+function Test-CodexProfile {
+    param([string]$ProfileName)
+    $dirPath = Join-Path $script:ProfilesDir $ProfileName
+    return (Test-Path $dirPath -PathType Container)
+}
+
+function Get-CodexProfilePath {
+    param([string]$ProfileName)
+    return Join-Path $script:ProfilesDir $ProfileName
 }
 
 function Get-AllProfiles {
@@ -183,7 +194,7 @@ function Show-Help {
 # ============================================================================
 
 function Invoke-List {
-    $profiles = Get-AllProfiles
+    $profiles = @(Get-AllProfiles)
 
     if ($profiles.Count -eq 0) {
         Write-ColorOutput "No profiles found." "Warning"
@@ -324,7 +335,7 @@ function Invoke-Show {
 
     # Show current session state
     $activeProfile = [Environment]::GetEnvironmentVariable($script:ActiveProfileKey)
-    $trackedVars = Get-TrackedVars
+    $trackedVars = @(Get-TrackedVars)
 
     if ([string]::IsNullOrEmpty($activeProfile)) {
         Write-ColorOutput "No active profile." "Muted"
@@ -362,7 +373,7 @@ function Invoke-Show {
 function Invoke-Clear {
     param([switch]$Silent)
 
-    $trackedVars = Get-TrackedVars
+    $trackedVars = @(Get-TrackedVars)
     $activeProfile = [Environment]::GetEnvironmentVariable($script:ActiveProfileKey)
 
     if ($trackedVars.Count -eq 0 -and [string]::IsNullOrEmpty($activeProfile)) {
