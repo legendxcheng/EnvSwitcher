@@ -122,6 +122,43 @@ _evs_get_codex_profile_path() {
     echo "$EVS_PROFILES_DIR/$name"
 }
 
+_evs_apply_codex_config() {
+    local profile_name="$1"
+    local profile_path="$(_evs_get_codex_profile_path "$profile_name")"
+    local config_file="$profile_path/config.toml"
+    local auth_file="$profile_path/auth.json"
+
+    # Validate files exist
+    if [[ ! -f "$config_file" ]]; then
+        echo -e "${RED}Missing config.toml in profile '$profile_name'${NC}"
+        return 1
+    fi
+
+    if [[ ! -f "$auth_file" ]]; then
+        echo -e "${RED}Missing auth.json in profile '$profile_name'${NC}"
+        return 1
+    fi
+
+    # Ensure ~/.codex directory exists
+    local codex_dir="$HOME/.codex"
+    mkdir -p "$codex_dir"
+
+    # Copy files
+    if ! cp "$config_file" "$codex_dir/config.toml" 2>/dev/null; then
+        echo -e "${RED}Failed to copy config files.${NC}"
+        echo -e "${YELLOW}Check permissions for $codex_dir directory${NC}"
+        return 1
+    fi
+
+    if ! cp "$auth_file" "$codex_dir/auth.json" 2>/dev/null; then
+        echo -e "${RED}Failed to copy config files.${NC}"
+        echo -e "${YELLOW}Check permissions for $codex_dir directory${NC}"
+        return 1
+    fi
+
+    return 0
+}
+
 _evs_mask_value() {
     local value="$1"
     local len=${#value}
