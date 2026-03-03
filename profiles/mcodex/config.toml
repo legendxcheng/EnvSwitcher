@@ -1,13 +1,120 @@
-model_provider = "sub2api"
+model_provider = "codex"
 model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
-network_access = "enabled"
 disable_response_storage = true
-windows_wsl_setup_acknowledged = true
-model_verbosity = "high"
+personality = "pragmatic"
 
-[model_providers.sub2api]
-name = "sub2api"
+[mcp_servers.Context7]
+command = "npx"
+args = [ "-y", "@upstash/context7-mcp@latest" ]
+
+[mcp_servers.playwright]
+command = "npx"
+args = [ "@playwright/mcp@latest" ]
+
+[mcp_servers.pencil]
+command = "D:\\Program Files (x86)\\PencilDev\\resources\\app.asar.unpacked\\out\\mcp-server-windows-x64.exe"
+args = [ "--app", "desktop" ]
+
+[model_providers.codex]
+name = "codex"
 base_url = "https://ai.monay.top"
 wire_api = "responses"
 requires_openai_auth = true
+
+[notice]
+hide_full_access_warning = true
+
+[notice.model_migrations]
+gpt-5 = "gpt-5.2-codex"
+
+[features]
+experimental_windows_sandbox = true
+elevated_windows_sandbox = true
+
+[projects."\\\\?\\E:\\SniperAlien"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\IAA_Dingzhi\\playablead_card_sort"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\IAA_Dingzhi\\playablead_ice_break"]
+trust_level = "trusted"
+
+[projects."\\\\?\\F:\\EdgeDownload\\WaifuAcademy-0.13.5-pc\\WaifuAcademy-0.13.5-pc\\renpy_analyzer"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\Summerfly2"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\IAA_Dingzhi\\playablead_ice_break\\game-client"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\ContextSwitcher"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\panda-oasis"]
+trust_level = "trusted"
+
+[projects."E:\\MyWaveTerm"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\XianxiaDefense"]
+trust_level = "trusted"
+
+[projects."E:\\Youdoo"]
+trust_level = "trusted"
+
+[projects."D:\\WeGameApps\\rail_apps\\OasisEraEditor(2001776)\\ShadowTrackerExtra\\UGCProjects\\panda"]
+trust_level = "trusted"
+
+[projects."E:\\Oasis"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\Oasis\\APIDocs"]
+trust_level = "trusted"
+
+[projects."D:\\WeGameApps\\rail_apps\\OasisEraEditor(2001776)\\ShadowTrackerExtra\\UGCProjects"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\AndroidAppResExtractor"]
+trust_level = "trusted"
+
+[projects."E:\\游戏解包素材\\WaterSortColorMatchPuzzle"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\water_embedding_game"]
+trust_level = "trusted"
+
+[projects."\\\\?\\E:\\panda-oasis\\UAssetAPI"]
+trust_level = "trusted"
+
+[projects."D:\\WeGameApps\\rail_apps\\OasisEraEditor(2001776)\\ShadowTrackerExtra\\Content\\LuaHelper"]
+trust_level = "trusted"
+
+[projects."D:\\WeGameApps\\rail_apps\\OasisEraEditor(2001776)\\ShadowTrackerExtra\\UGCProjects\\JSDJS"]
+trust_level = "trusted"
+
+[projects.'\\?\E:\stone-oasis']
+trust_level = "trusted"
+
+[projects.'\\?\E:\EnvVarSwitcher']
+trust_level = "trusted"
+
+[projects.'E:\Youdoo\欢乐喷涂\budget']
+trust_level = "trusted"
+
+[projects.'E:\Lys\南沙便利店']
+trust_level = "trusted"
+
+[projects.'C:\Users\Administrator.DESKTOP-09JQGNK']
+trust_level = "trusted"
+
+[projects.'\\?\E:\IAA_Dingzhi\playablead_tile_zombie']
+trust_level = "trusted"
+
+[projects.'\\?\E:\CocosProj\ShelterRogue']
+trust_level = "trusted"
+
+[projects.'\\?\E:\CocosProj\ShelterRogue\.git\modules\Trunk']
+trust_level = "trusted"
