@@ -14,10 +14,10 @@ cd E:\EnvVarSwitcher
 . $PROFILE
 ```
 
-## WSL/Linux Installation (Bash)
+## Linux/WSL Installation (Bash)
 
 ```bash
-cd /mnt/e/EnvVarSwitcher
+cd /path/to/EnvVarSwitcher
 bash install-wsl.sh
 source ~/.bashrc
 ```
@@ -99,6 +99,74 @@ Profiles are stored as JSON files in the `profiles/` directory:
 
 ---
 
+## Codex Configuration Profiles
+
+In addition to environment variable profiles (JSON files), evs also supports Codex CLI configuration profiles.
+
+### Codex Profile Structure
+
+Codex profiles are stored as directories in the `profiles/` folder, each containing two files:
+
+```
+profiles/
+├── gcodex/              # Codex configuration profile
+│   ├── config.toml      # Codex configuration
+│   └── auth.json        # Authentication credentials
+└── dev.json             # Environment variable profile
+```
+
+### Creating a Codex Profile
+
+1. Create a directory in `profiles/`:
+   ```bash
+   mkdir profiles/my-codex
+   ```
+
+2. Add `config.toml`:
+   ```toml
+   model_provider = "openai"
+   model = "gpt-4"
+   # ... other Codex settings
+   ```
+
+3. Add `auth.json`:
+   ```json
+   {
+     "OPENAI_API_KEY": "your-api-key-here"
+   }
+   ```
+
+### Using Codex Profiles
+
+Switch to a Codex profile just like environment variable profiles:
+
+```bash
+evs use gcodex
+```
+
+This will copy the configuration files to `~/.codex/` directory.
+
+### Profile Types
+
+When listing profiles, evs shows the type of each profile:
+
+```bash
+evs list
+```
+
+Output:
+```
+Available profiles:
+
+  dev             [env]   - Local development environment
+  gcodex          [codex] - Codex configuration
+  mcodex          [codex] - Codex configuration
+
+* = active profile
+```
+
+---
+
 ## Directory Structure
 
 ```
@@ -125,13 +193,14 @@ E:\EnvVarSwitcher\
 
 ---
 
-## WSL-Specific Notes
+## Linux/WSL Notes
 
 ### Profile Locations
 
-WSL checks for profiles in this order:
+`evs` checks profiles in this order:
 1. `~/.config/evs/profiles/` (local, takes priority)
-2. `/mnt/e/EnvVarSwitcher/profiles/` (shared with Windows)
+2. `<repo>/profiles/` (the repository where `evs.sh` is installed from)
+3. `/mnt/e/EnvVarSwitcher/profiles/` (WSL only, shared with Windows when available)
 
 ### Create Local Profiles
 
@@ -163,9 +232,9 @@ cd E:\EnvVarSwitcher
 . $PROFILE
 ```
 
-**WSL:**
+**Linux/WSL:**
 ```bash
-cd /mnt/e/EnvVarSwitcher
+cd /path/to/EnvVarSwitcher
 bash install-wsl.sh
 source ~/.bashrc
 ```
